@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>چت عشق با وفا</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101525;color:white;font-family:Tahoma,Arial}
+header{background:#b51e55;padding:20px;text-align:center}
+header h2{margin:0}
+header p{margin:8px 0 0}
+main{max-width:650px;margin:20px auto;padding:12px}
+.panel{background:#202b40;padding:18px;border-radius:14px;margin-bottom:15px}
+input,button{width:100%;padding:13px;border:0;border-radius:9px;margin:6px 0;font-size:15px}
+input{background:#f1f1f1;color:#222}
+button{background:#d52c69;color:white;font-weight:bold;cursor:pointer}
+button.secondary{background:#354764}
+#chat{display:none}
+#messages{height:300px;overflow-y:auto;background:#111a2b;padding:12px;border-radius:10px}
+.msg{background:#293852;padding:10px;border-radius:9px;margin:8px 0}
+small{color:#ffb3d0}
+#users{color:#b8d8ff}
+footer{text-align:center;color:#aaa;padding:20px}
+</style>
+</head>
+<body>
+<header>
+<h2>❤️ چت عشق با وفا ❤️</h2>
+<p>دوستی، محبت و احترام</p>
+</header>
+<main>
+<section id="login" class="panel">
+<h3>ورود به چت</h3>
+<input id="username" placeholder="نام کاربری">
+<input id="password" type="password" placeholder="رمز عبور">
+<button onclick="enterChat()">ورود / ثبت نام</button>
+<p id="error"></p>
+</section>
+
+<section id="chat">
+<div class="panel">
+سلام <b id="welcome"></b> ❤️
+<button class="secondary" onclick="logout()">خروج</button>
+</div>
+<div class="panel">
+<h3>💬 گفتگوی عمومی</h3>
+<div id="messages"></div>
+<input id="message" placeholder="پیام خود را بنویسید...">
+<button onclick="sendMessage()">ارسال پیام</button>
+</div>
+<div class="panel">
+<h3>👥 کاربران</h3>
+<div id="users">کاربرانی که در این دستگاه ثبت شده‌اند</div>
+</div>
+<div class="panel" id="admin" style="display:none">
+<h3>⚙️ مدیریت</h3>
+<p>مدیر اصلی: فیاض</p>
+<p>مدیریت نقش‌ها در نسخه سروری فعال خواهد شد.</p>
+</div>
+</section>
+</main>
+<footer>چت عشق با وفا © 2026</footer>
+<script>
+let currentUser="";
+let accounts=JSON.parse(localStorage.getItem("accounts")||"{}");
+let messages=JSON.parse(localStorage.getItem("messages")||"[]");
+
+function enterChat(){
+ const u=document.getElementById("username").value.trim();
+ const p=document.getElementById("password").value;
+ if(u.length<3||p.length<4){
+  document.getElementById("error").textContent="نام کاربری حداقل ۳ و رمز حداقل ۴ حرف باشد.";
+  return;
+ }
+ if(accounts[u] && accounts[u].password!==p){
+  document.getElementById("error").textContent="رمز عبور اشتباه است.";
+  return;
+ }
+ if(!accounts[u]){
+  accounts[u]={password:p,role:Object.keys(accounts).length===0?"admin":"member"};
+  localStorage.setItem("accounts",JSON.stringify(accounts));
+ }
+ currentUser=u;
+ document.getElementById("login").style.display="none";
+ document.getElementById("chat").style.display="block";
+ document.getElementById("welcome").textContent=u;
+ document.getElementById("admin").style.display=accounts[u].role==="admin"?"block":"none";
+ showMessages();
+ showUsers();
+}
+function sendMessage(){
+ const box=document.getElementById("message");
+ const value=box.value.trim();
+ if(!value)return;
+ messages.push({user:currentUser,text:value,time:new Date().toLocaleTimeString("fa-IR")});
+ localStorage.setItem("messages",JSON.stringify(messages));
+ box.value="";
+ showMessages();
+}
+function showMessages(){
+ const area=document.getElementById("messages");
+ area.innerHTML="";
+ messages.forEach(m=>{
+  const div=document.createElement("div");
+  div.className="msg";
+  const name=document.createElement("b");
+  name.textContent=m.user+" ";
+  const time=document.createElement("small");
+  time.textContent=m.time;
+  const text=document.createElement("div");
+  text.textContent=m.text;
+  div.append(name,time,text);
+  area.appendChild(div);
+ });
+ area.scrollTop=area.scrollHeight;
+}
+function showUsers(){
+ document.getElementById("users").textContent=Object.keys(accounts).join("، ")||"هنوز کاربری ثبت نشده";
+}
+function logout(){
+ currentUser="";
+ document.getElementById("chat").style.display="none";
+ document.getElementById("login").style.display="block";
+}
+document.getElementById("message").addEventListener("keydown",e=>{
+ if(e.key==="Enter")sendMessage();
+});
+</script>
+</body>
+</html>
